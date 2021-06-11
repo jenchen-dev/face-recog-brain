@@ -38,7 +38,7 @@ class Register extends React.Component {
                     this.props.loadUser(user);
                     this.props.onRouteChange('home');
                 } else {
-                    alert('Please register with full information first!')
+                    alert('Please register with full information!')
                 }
             })
     }
