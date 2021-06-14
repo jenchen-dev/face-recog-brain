@@ -28,23 +28,25 @@ const particlesOptions = {
   }
 }
 
+const initialState = {
+    input: '',
+    imageUrl: '',
+    boxes: [],
+    route: 'signin',
+    isSignedIn: false,
+    user: {
+      id: '',
+      name: '',
+      email: '',
+      entries: 0,
+      joined: ''
+    }
+}
+
 class App extends Component {
   constructor() {
     super();
-    this.state = {
-      input: '',
-      imageUrl: '',
-      box: {},
-      route: 'signin',
-      isSignedIn: false,
-      user: {
-        id: '',
-        name: '',
-        email: '',
-        entries: 0,
-        joined: ''
-      }
-    }
+    this.state = initialState;
   }
 
   loadUser = (data) => {
@@ -59,20 +61,29 @@ class App extends Component {
   }
 
   calculateFaceLocation = (result) => {
-    const clarifaiFace = result.outputs[0].data.regions[0].region_info.bounding_box;
+    const clarifaiFaces = result.outputs[0].data.regions.map(region => region.region_info.bounding_box);
     const image = document.getElementById('inputimage');
     const width = Number(image.width);
     const height = Number(image.height);
-    return {
-      leftCol: clarifaiFace.left_col * width,
-      topRow: clarifaiFace.top_row * height,
-      rightCol: width - (clarifaiFace.right_col * width),
-      bottomRow: height - (clarifaiFace.bottom_row * height)
-    }
+
+    return clarifaiFaces.map(face => {
+      return {
+        leftCol: face.left_col * width,
+        topRow: face.top_row * height,
+        rightCol: width - (face.right_col * width),
+        bottomRow: height - (face.bottom_row * height)
+      }
+    })
   }
 
-  displayFaceBox = (box) => {
-    this.setState({box: box});
+  resetImageInputs = () => {
+    const inputLink = document.getElementById('imagelink');
+    inputLink.value='';
+    this.setState({input: initialState.input, imageUrl: initialState.imageUrl, boxes: initialState.boxes});
+  }
+
+  displayFaceBox = (boxes) => {
+    this.setState({boxes: boxes});
   }
 
   onInputChange = (Event) => {
@@ -98,6 +109,7 @@ class App extends Component {
             .then(count => {
               this.setState(Object.assign(this.state.user, { entries: count }))
             })
+            .catch(console.log)
         }
         this.displayFaceBox(this.calculateFaceLocation(response))
         })
@@ -106,7 +118,7 @@ class App extends Component {
 
   onRouteChange = (route) => {
     if (route === 'signout') {
-      this.setState({isSignedIn: false});
+      this.setState(initialState);
     } else if (route === 'home') {
       this.setState({isSignedIn: true})
     }
@@ -114,7 +126,7 @@ class App extends Component {
   }
 
   render() {
-    const { isSignedIn, imageUrl, route, box } = this.state;
+    const { isSignedIn, imageUrl, route, boxes } = this.state;
     return (
       <div className='App'>
         <Particles className='particles'
@@ -124,15 +136,19 @@ class App extends Component {
         { route === 'home' 
           ? <div>
               <Logo/>
-              <Rank name={this.state.user.name} entries={this.state.user.entries}/>
+              <Rank 
+                name={this.state.user.name} 
+                entries={this.state.user.entries}
+              />
               <ImageLinkForm 
                 onInputChange={this.onInputChange} 
                 onPictureSubmit={this.onPictureSubmit}
+                resetImageInputs={this.resetImageInputs}
               />
-              <FaceRecognition box={box} imageUrl={imageUrl}/>
+              <FaceRecognition boxes={boxes} imageUrl={imageUrl}/>
             </div>
           : (
-            this.state.route === 'register'
+            route === 'register'
             ? <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange}/>
             : <SignIn loadUser={this.loadUser} onRouteChange={this.onRouteChange}/>
           )
