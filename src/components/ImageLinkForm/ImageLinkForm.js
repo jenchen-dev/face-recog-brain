@@ -9,7 +9,7 @@ const ImageLinkForm = ({ onInputChange, onPictureSubmit, resetImageInputs }) => 
             </p>
             <div className='center'>
                 <div className='form center pa4 br3 shadow-5'>
-                    <input id='imagelink' placeholder='image link' className='f4 pa2 w-70 center' type='text' onChange={onInputChange}/>
+                    <input id='imagelink' placeholder='paste your image link' className='f4 pa2 w-70 center' type='text' onChange={onInputChange}/>
                     <button 
                         className='code w-15 grow f4 link ph3 pv2 dib white bg-light-purple'
                         onClick={onPictureSubmit}

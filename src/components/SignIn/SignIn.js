@@ -31,9 +31,8 @@ class SignIn extends React.Component {
                 if (user.id) {
                     this.props.loadUser(user);
                     this.props.onRouteChange('home');
-                    this.props.resetImageBox();
                 } else {
-                    alert('wrong email or password, please try again!')
+                    alert('Wrong email or password, please try again!')
                 }
             })
     }
