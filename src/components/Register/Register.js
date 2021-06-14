@@ -34,12 +34,13 @@ class Register extends React.Component {
         })
             .then(response => response.json())
             .then(user => {
-                if (user.name && user.email && user.password) {
+                if (user) {
                     this.props.loadUser(user);
                     this.props.onRouteChange('home');
-                } else {
-                    alert('Please register with full information!')
-                }
+                } 
+                // else {
+                //     alert('Please register with full information!')
+                // }
             })
     }
 
