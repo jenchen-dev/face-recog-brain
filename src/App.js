@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import Particles from 'react-particles-js';
-import Clarifai from 'clarifai';
 
 import Navigation from './components/Navigation/Navigation';
 import Logo from './components/Logo/Logo';
@@ -11,10 +10,6 @@ import Register from './components/Register/Register';
 import Rank from './components/Rank/Rank';
 
 import './App.css';
-
-const app = new Clarifai.App({
-  apiKey: '41faa463c06f48a58b46475462164553'
-})
 
 const particlesOptions = {
   particles: {
@@ -68,10 +63,10 @@ class App extends Component {
 
     return clarifaiFaces.map(face => {
       return {
-        leftCol: face.left_col * width,
         topRow: face.top_row * height,
-        rightCol: width - (face.right_col * width),
-        bottomRow: height - (face.bottom_row * height)
+        leftCol: face.left_col * width,
+        bottomRow: height - (face.bottom_row * height),
+        rightCol: width - (face.right_col * width)
       }
     })
   }
@@ -92,26 +87,30 @@ class App extends Component {
 
   onPictureSubmit = () => {
     this.setState({imageUrl: this.state.input});
-    app.models
-      .predict(
-        Clarifai.FACE_DETECT_MODEL,
-        this.state.input)
-      .then(response => {
-        if (response) {
-          fetch('http://localhost:3000/image', {
-            method: 'put',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-              id: this.state.user.id
+      fetch('http://localhost:3000/imageurl', {
+        method: 'post',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          input: this.state.input
+        })
+      })
+        .then(response => response.json())
+        .then(response => {
+          if (response) {
+            fetch('http://localhost:3000/image', {
+              method: 'put',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                id: this.state.user.id
+              })
             })
-          })
-            .then(response => response.json())
-            .then(count => {
-              this.setState(Object.assign(this.state.user, { entries: count }))
-            })
-            .catch(console.log)
-        }
-        this.displayFaceBox(this.calculateFaceLocation(response))
+              .then(response => response.json())
+              .then(count => {
+                this.setState(Object.assign(this.state.user, { entries: count }))
+              })
+              .catch(console.log)
+          }
+          this.displayFaceBox(this.calculateFaceLocation(response))
         })
       .catch(err => console.log(err));
   }
